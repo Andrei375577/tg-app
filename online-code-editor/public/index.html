@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Онлайн Редактор Кода</title>
+  <style>
+    body { display: flex; height: 100vh; margin: 0; font-family: sans-serif; }
+    #sidebar { width: 200px; background: #f0f0f0; padding: 10px; box-sizing: border-box; }
+    #main { flex: 1; display: flex; flex-direction: column; }
+    #tabs { display: flex; }
+    #tabs button { margin-right: 5px; }
+    #editor { flex: 1; display: flex; }
+    textarea { width: 100%; height: 100%; resize: none; font-family: monospace; }
+    #preview { flex: 1; border: 1px solid #ccc; }
+    .file { cursor: pointer; margin-bottom: 5px; }
+    .file.selected { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h4>Файлы</h4>
+    <div id="file-list"></div>
+    <input id="new-file-name" placeholder="имя файла..." />
+    <button onclick="addFile()">Добавить</button>
+    <button onclick="deleteFile()">Удалить</button>
+  </div>
+  <div id="main">
+    <div id="tabs"></div>
+    <div id="editor">
+      <textarea id="code" oninput="updateFile()"></textarea>
+      <iframe id="preview"></iframe>
+    </div>
+  </div>
+  <script>
+    // Простая файловая система в памяти
+    let files = {
+      "index.html": "<!DOCTYPE html>\n<html>\n<head>\n  <title>Пример</title>\n</head>\n<body>\n  <h1>Привет, мир!</h1>\n</body>\n</html>",
+      "style.css": "body { background: #fff; color: #222; }",
+      "script.js": "console.log('Hello!');"
+    };
+    let selectedFile = "index.html";
+
+    function renderFileList() {
+      const list = document.getElementById('file-list');
+      list.innerHTML = '';
+      Object.keys(files).forEach(name => {
+        const div = document.createElement('div');
+        div.textContent = name;
+        div.className = 'file' + (name === selectedFile ? ' selected' : '');
+        div.onclick = () => selectFile(name);
+        list.appendChild(div);
+      });
+    }
+
+    function selectFile(name) {
+      selectedFile = name;
+      document.getElementById('code').value = files[name];
+      renderFileList();
+      renderTabs();
+      updatePreview();
+    }
+
+    function addFile() {
+      const name = document.getElementById('new-file-name').value.trim();
+      if (!name || files[name]) return;
+      files[name] = '';
+      selectFile(name);
+      document.getElementById('new-file-name').value = '';
+    }
+
+    function deleteFile() {
+      if (Object.keys(files).length === 1) return;
+      delete files[selectedFile];
+      selectedFile = Object.keys(files)[0];
+      selectFile(selectedFile);
+    }
+
+    function updateFile() {
+      files[selectedFile] = document.getElementById('code').value;
+      updatePreview();
+    }
+
+    function renderTabs() {
+      const tabs = document.getElementById('tabs');
+      tabs.innerHTML = '';
+      Object.keys(files).forEach(name => {
+        const btn = document.createElement('button');
+        btn.textContent = name;
+        btn.onclick = () => selectFile(name);
+        if (name === selectedFile) btn.style.fontWeight = 'bold';
+        tabs.appendChild(btn);
+      });
+    }
+
+    function updatePreview() {
+      const html = files['index.html'] || '';
+      const css = files['style.css'] || '';
+      const js = files['script.js'] || '';
+      const iframe = document.getElementById('preview');
+      iframe.srcdoc = `
+        ${html}
+        <style>${css}</style>
+        <script>${js}<\/script>
+      `;
+    }
+
+    // Инициализация
+    renderFileList();
+    renderTabs();
+    selectFile(selectedFile);
+  </script>
+</body>
+</html>
