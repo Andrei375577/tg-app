@@ -1,13 +1,102 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Онлайн Редактор Кода</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Стихи</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #20223d;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .card {
+      background: linear-gradient(145deg, #2a2a3d, #1a1a2b);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 320px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+      color: #f0f0f0;
+      text-align: center;
+      position: relative;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle, #ff0026, transparent);
+      border-radius: 50%;
+      opacity: 0.4;
+    }
+    .poem {
+      font-size: 13px;
+      line-height: 9px;
+      white-space: pre-wrap;
+      margin: 0 0 12px 0;
+    }
+    .author {
+      font-size: 13px;
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script src="bundle.js"></script>
+<div class="card">
+  <div class="poem">
+    Осень шепчет — прощай, не держи,<br>
+    Я ушёл, как туман за оврагом.<br>
+    Ты в глазах моих — свет от зари,<br>
+    Но я стал для тебя только шагом.
+  </div>
+  <div class="author">— Сердце без имени</div>
+</div>
+
+<div class="card">
+  <div class="poem">
+    Я любил тебя — тихо, как снег,<br>
+    Что ложится на крышу без звука.<br>
+    Но ушёл, как уходит человек,<br>
+    Что не вынес ни ласки, ни муки.
+  </div>
+  <div class="author">— Сердце без имени</div>
+</div>
+
+<div class="card">
+  <div class="poem">
+    В поле — ветер, в душе — пустота,<br>
+    Я брожу между строк, как по краю.<br>
+    Ты — как песня, что пела мечта,<br>
+    А теперь — я её забываю.
+  </div>
+  <div class="author">— Сердце без имени</div>
+</div>
+
+<div class="card">
+  <div class="poem">
+    Я писал тебе письма в тетрадь,<br>
+    Где чернила — слезинки и вьюга.<br>
+    Но ты — как весна, что опять<br>
+    Не пришла, хоть я ждал её с юга.
+  </div>
+  <div class="author">— Сердце без имени</div>
+</div>
+
+<div class="card">
+  <div class="poem">
+    Не суди меня строго, родная,<br>
+    Я — как лист, что упал на дорогу.<br>
+    Я любил, но ушёл, не прощая,<br>
+    Потому что не знал — как немного.
+  </div>
+  <div class="author">— Сердце без имени</div>
+</div>
 </body>
 </html>
