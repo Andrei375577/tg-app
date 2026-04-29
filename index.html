@@ -1,532 +1,504 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Sensei AI — ваш умный помощник</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .chat-container {
-            width: 100%;
-            max-width: 900px;
-            height: 90vh;
-            background: #0a0a0f;
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        /* Шапка — Sensei AI */
-        .chat-header {
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 18px 24px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-        }
-
-        .sensei-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .header-text {
-            flex: 1;
-        }
-
-        .header-text h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .header-text p {
-            font-size: 0.75rem;
-            color: #888;
-            margin-top: 2px;
-        }
-
-        .status-badge {
-            background: rgba(255, 215, 0, 0.15);
-            padding: 6px 12px;
-            border-radius: 40px;
-            font-size: 0.7rem;
-            color: #ffd700;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-
-        /* Область сообщений */
-        .messages-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            background: #0a0a0f;
-        }
-
-        .message {
-            display: flex;
-            gap: 12px;
-            max-width: 85%;
-            animation: fadeSlideUp 0.25s ease;
-        }
-
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .user-message {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        .bot-message {
-            align-self: flex-start;
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .user-avatar {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #1a1a2e;
-        }
-
-        .bot-avatar {
-            background: #1e1e2f;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: #ffd700;
-        }
-
-        .bubble {
-            padding: 12px 18px;
-            border-radius: 20px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            font-size: 0.95rem;
-        }
-
-        .user-bubble {
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            color: #0a0a0f;
-            border-bottom-right-radius: 4px;
-            font-weight: 500;
-        }
-
-        .bot-bubble {
-            background: #1a1a2a;
-            color: #e0e0e0;
-            border-bottom-left-radius: 4px;
-            border: 1px solid rgba(255, 215, 0, 0.15);
-        }
-
-        /* Индикатор "Сенсей думает" */
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 18px;
-            background: #1a1a2a;
-            border-radius: 24px;
-            width: fit-content;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #ffd700;
-            border-radius: 50%;
-            animation: senseiTyping 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes senseiTyping {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-8px); opacity: 1; }
-        }
-
-        /* Панель ввода */
-        .input-area {
-            padding: 18px 20px;
-            background: #0f0f17;
-            border-top: 1px solid rgba(255, 215, 0, 0.1);
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .input-wrapper {
-            flex: 1;
-            display: flex;
-            background: #1a1a2a;
-            border-radius: 28px;
-            padding: 8px 18px;
-            transition: all 0.2s;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-
-        .input-wrapper:focus-within {
-            border-color: #ffd700;
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
-        }
-
-        .message-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 10px 0;
-            font-size: 0.95rem;
-            resize: none;
-            outline: none;
-            font-family: inherit;
-            max-height: 100px;
-            color: #fff;
-        }
-
-        .message-input::placeholder {
-            color: #666;
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            border: none;
-            color: #0a0a0f;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: transform 0.15s, box-shadow 0.15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
-        }
-
-        .send-btn:active {
-            transform: scale(0.96);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        .clear-btn {
-            background: #2a2a3a;
-            color: #ffaa44;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .icon-btn {
-            background: #1a1a2a;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
-            color: #ffd700;
-        }
-
-        .icon-btn:hover {
-            background: #2a2a3a;
-            border-color: #ffd700;
-        }
-
-        /* Скролл */
-        .messages-area::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .messages-area::-webkit-scrollbar-track {
-            background: #1a1a2a;
-        }
-
-        .messages-area::-webkit-scrollbar-thumb {
-            background: #ffd700;
-            border-radius: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .message {
-                max-width: 95%;
-            }
-            .chat-container {
-                height: 95vh;
-                border-radius: 24px;
-            }
-            .header-text h1 {
-                font-size: 1.3rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Вёрстка сайтов | Новичок? Нет — начинающий профи!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0f1a 0%, #0c1220 100%);
+      color: #eef2ff;
+      line-height: 1.5;
+      scroll-behavior: smooth;
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 28px;
+    }
+    /* декоративные элементы */
+    .gradient-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -2;
+      background: radial-gradient(ellipse at 20% 30%, rgba(79, 114, 189, 0.15), transparent 60%),
+                  radial-gradient(ellipse at 85% 70%, rgba(139, 92, 246, 0.12), transparent 55%);
+    }
+    /* кнопки */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(105deg, #ffffff, #eef3ff);
+      color: #0a0c12;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 60px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .btn-primary {
+      background: linear-gradient(105deg, #ffffff, #d9e6ff);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      color: white;
+      box-shadow: none;
+    }
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: white;
+      transform: translateY(-2px);
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+    }
+    /* заголовки */
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(4px);
+      border-radius: 100px;
+      padding: 6px 18px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 0.5px solid rgba(255,255,255,0.12);
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #FFFFFF, #bbd4ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 1.1rem;
+      color: #8e9fc3;
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+    /* hero секция */
+    .hero {
+      padding: 80px 0 80px;
+    }
+    .hero-grid {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 50px;
+    }
+    .hero-content {
+      flex: 1.2;
+    }
+    .hero-content h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero-content h1 span {
+      background: linear-gradient(115deg, #fff, #b6cdff, #a17eff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-content p {
+      font-size: 1.1rem;
+      color: #b9c8ff;
+      margin-bottom: 32px;
+      max-width: 550px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 28px;
+      margin-top: 40px;
+    }
+    .stat-item {
+      border-left: 2px solid rgba(255,255,255,0.25);
+      padding-left: 18px;
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .hero-card {
+      flex: 0.9;
+      background: rgba(20, 25, 45, 0.5);
+      backdrop-filter: blur(12px);
+      border-radius: 36px;
+      padding: 28px;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    /* карточки услуг */
+    .services-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin: 40px 0;
+    }
+    .service-card {
+      background: rgba(18, 22, 38, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      padding: 28px 24px;
+      flex: 1 1 260px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: 0.2s;
+    }
+    .service-card:hover {
+      border-color: rgba(108, 142, 255, 0.4);
+      transform: translateY(-5px);
+    }
+    .service-icon {
+      font-size: 2.2rem;
+      margin-bottom: 18px;
+    }
+    .price-tag {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 15px 0 8px;
+      color: #ffffff;
+    }
+    .price-note {
+      font-size: 0.75rem;
+      color: #8e9fc3;
+    }
+    /* портфолио */
+    .portfolio-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+    .portfolio-item {
+      background: #10131f;
+      border-radius: 28px;
+      overflow: hidden;
+      flex: 1 1 260px;
+      border: 1px solid #1e2538;
+    }
+    .portfolio-img {
+      height: 170px;
+      background: linear-gradient(135deg, #1b213a, #11152a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+    }
+    .portfolio-info {
+      padding: 20px;
+    }
+    /* форма */
+    .form-wrapper {
+      background: linear-gradient(125deg, #0f1322, #0a0e1a);
+      border-radius: 48px;
+      padding: 48px;
+      border: 1px solid #242b41;
+      margin: 40px 0;
+    }
+    .form-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 48px;
+    }
+    .contact-form input, .contact-form textarea {
+      width: 100%;
+      background: #0b0e17;
+      border: 1px solid #262e46;
+      padding: 14px 22px;
+      border-radius: 60px;
+      color: white;
+      font-family: inherit;
+      transition: 0.2s;
+    }
+    .contact-form textarea {
+      border-radius: 28px;
+      resize: vertical;
+    }
+    .contact-form input:focus, .contact-form textarea:focus {
+      border-color: #6c8eff;
+      outline: none;
+    }
+    .telegram-badge {
+      background: rgba(108,142,255,0.12);
+      border-radius: 20px;
+      padding: 12px 18px;
+      margin-top: 24px;
+      font-size: 0.8rem;
+      text-align: center;
+      border: 1px solid rgba(108,142,255,0.3);
+    }
+    .footer {
+      text-align: center;
+      padding: 40px 0;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      margin-top: 40px;
+    }
+    @media (max-width: 768px) {
+      .hero-content h1 { font-size: 2.3rem; }
+      .section-title { font-size: 1.9rem; }
+      .form-wrapper { padding: 28px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="sensei-icon">⚡</div>
-            <div class="header-text">
-                <h1>Sensei AI</h1>
-                <p>ваш персональный наставник</p>
-            </div>
-            <div class="status-badge">● всегда рядом</div>
-        </div>
+<div class="gradient-bg"></div>
 
-        <div class="messages-area" id="messagesArea">
-            <div class="message bot-message">
-                <div class="avatar bot-avatar">🧘</div>
-                <div class="bubble bot-bubble">
-                    Приветствую, ученик. Я <strong>Sensei AI</strong>.<br>
-                    Задавай вопросы — я помогу разобраться в любых темах. Чему хочешь научиться сегодня?
-                </div>
-            </div>
-            <div class="typing-indicator" id="typingIndicator">
-                <div class="avatar bot-avatar" style="background:transparent;">🧘</div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <div class="typing-dot"></div>
-                <span style="color:#ffd700; font-size:0.75rem; margin-left:6px;">сенсей думает...</span>
-            </div>
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="badge"><i class="fab fa-telegram"></i> Заявки → Telegram мгновенно</div>
+        <h1>Вёрстка сайтов <span>доступно и качественно</span></h1>
+        <p>Адаптив, чистый код, Pixel Perfect. Превращаю ваш дизайн в современный сайт. Все заявки приходят в Telegram — я отвечаю быстро!</p>
+        <div class="hero-buttons" style="display: flex; gap: 16px; flex-wrap: wrap;">
+          <a href="#contact" class="btn btn-primary"><i class="fab fa-telegram"></i> Отправить заявку</a>
+          <a href="#portfolio" class="btn btn-outline"><i class="fas fa-eye"></i> Портфолио</a>
         </div>
-
-        <div class="input-area">
-            <div class="input-wrapper">
-                <textarea class="message-input" id="messageInput" placeholder="Напиши свой вопрос..." rows="1"></textarea>
-            </div>
-            <div class="action-buttons">
-                <button class="icon-btn clear-btn" id="clearBtn" title="Очистить диалог">🗑️</button>
-                <button class="send-btn" id="sendBtn">➤</button>
-            </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="stat-number">7+</div><div>проектов</div></div>
+          <div class="stat-item"><div class="stat-number">100%</div><div>довольных</div></div>
+          <div class="stat-item"><div class="stat-number">24ч</div><div>ответ</div></div>
         </div>
+      </div>
+      <div class="hero-card">
+        <i class="fas fa-code" style="font-size: 2rem; opacity: 0.8;"></i>
+        <h3 style="margin: 15px 0 10px;">Честные цены для старта</h3>
+        <p style="color: #b9c8ff; font-size: 0.9rem;">Фиксированная стоимость, никаких скрытых доплат. Оплата по этапам.</p>
+        <hr style="margin: 20px 0; border-color:#2a3450;">
+        <div><i class="fas fa-check-circle" style="color:#6c8eff;"></i> Адаптивная вёрстка</div>
+        <div style="margin-top: 10px;"><i class="fas fa-check-circle" style="color:#6c8eff;"></i> Чистый HTML/CSS/JS</div>
+        <div style="margin-top: 10px;"><i class="fas fa-check-circle" style="color:#6c8eff;"></i> Правки бесплатно (2 итерации)</div>
+      </div>
     </div>
+  </div>
+</section>
 
-    <script>
-        // ⚡ API настройки (DeepSeek, но в интерфейсе просто Sensei AI)
-        const DEEPSEEK_API_KEY = "sk-2d9f1fe5e23b493484f2fa7fc5cc139a";
-        const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
-        
-        // DOM элементы
-        const messagesArea = document.getElementById('messagesArea');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const typingIndicator = document.getElementById('typingIndicator');
-        
-        // История диалога (контекст)
-        let conversationHistory = [
-            {
-                role: "system",
-                content: "Ты — Sensei AI, мудрый и дружелюбный наставник. Отвечай ясно, вдохновляюще, на русском языке. Помогай пользователю думать шире и находить ответы. Не упоминай конкретные модели AI, просто будь Sensei."
-            }
-        ];
-        
-        // Авто-высота textarea
-        function autoResize() {
-            messageInput.style.height = 'auto';
-            messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
-        }
-        
-        messageInput.addEventListener('input', autoResize);
-        
-        function scrollToBottom() {
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-        
-        function addMessage(text, isUser) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = `avatar ${isUser ? 'user-avatar' : 'bot-avatar'}`;
-            avatar.textContent = isUser ? '👤' : '🧘';
-            
-            const bubble = document.createElement('div');
-            bubble.className = `bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`;
-            bubble.textContent = text;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(bubble);
-            
-            messagesArea.insertBefore(messageDiv, typingIndicator);
-            scrollToBottom();
-        }
-        
-        function showTyping(show) {
-            typingIndicator.style.display = show ? 'flex' : 'none';
-            scrollToBottom();
-        }
-        
-        // Запрос к API (без указания модели в интерфейсе)
-        async function askSensei(userMessage) {
-            conversationHistory.push({ role: "user", content: userMessage });
-            
-            if (conversationHistory.length > 25) {
-                conversationHistory = [conversationHistory[0], ...conversationHistory.slice(-22)];
-            }
-            
-            try {
-                const response = await fetch(DEEPSEEK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: "deepseek-chat",
-                        messages: conversationHistory,
-                        stream: false,
-                        temperature: 0.75,
-                        max_tokens: 2000
-                    })
-                });
-                
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error?.message || `Ошибка ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const reply = data.choices[0].message.content;
-                
-                conversationHistory.push({ role: "assistant", content: reply });
-                return reply;
-                
-            } catch (error) {
-                console.error(error);
-                let friendlyError = "❌ Сенсей временно недоступен. ";
-                if (error.message.includes('401')) friendlyError += "Проверь ключ доступа.";
-                else if (error.message.includes('429')) friendlyError += "Слишком много вопросов. Дыши глубже и попробуй позже.";
-                else friendlyError += "Попробуй ещё раз через минуту.";
-                return friendlyError + " 🧘";
-            }
-        }
-        
-        // Отправка сообщения
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text) return;
-            
-            messageInput.value = '';
-            autoResize();
-            
-            addMessage(text, true);
-            showTyping(true);
-            sendBtn.disabled = true;
-            
-            const botReply = await askSensei(text);
-            
-            showTyping(false);
-            addMessage(botReply, false);
-            sendBtn.disabled = false;
-            messageInput.focus();
-        }
-        
-        // Очистка (новая медитация)
-        function clearChat() {
-            conversationHistory = [
-                {
-                    role: "system",
-                    content: "Ты — Sensei AI, мудрый и дружелюбный наставник. Отвечай ясно, вдохновляюще, на русском языке. Помогай пользователю думать шире и находить ответы. Не упоминай конкретные модели AI, просто будь Sensei."
-                }
-            ];
-            
-            const allMsgs = document.querySelectorAll('.message');
-            allMsgs.forEach(msg => msg.remove());
-            
-            const welcomeDiv = document.createElement('div');
-            welcomeDiv.className = 'message bot-message';
-            welcomeDiv.innerHTML = `
-                <div class="avatar bot-avatar">🧘</div>
-                <div class="bubble bot-bubble">
-                    Диалог очищен. Начнём заново? Я слушаю тебя, ученик.
-                </div>
-            `;
-            messagesArea.insertBefore(welcomeDiv, typingIndicator);
-            scrollToBottom();
-        }
-        
-        sendBtn.addEventListener('click', sendMessage);
-        clearBtn.addEventListener('click', clearChat);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-        
-        // маленькая заметка про ключ (убрать рекламу модели)
-        console.log("Sensei AI готов — мудрость не знает границ");
-        
-        // Проверка ключа (без упоминания deepseek в ui)
-        if (!DEEPSEEK_API_KEY || DEEPSEEK_API_KEY === "sk-46c82ae8da164c4b99e66d86a12c81ab") {
-            setTimeout(() => {
-                addMessage("⚡ Совет: если ответов нет — проверь подключение к API. Я — Sensei, но тоже завишу от цифрового мира.", false);
-            }, 800);
-        }
-    </script>
+<!-- Услуги + ЦЕНЫ (реальные для новичка) -->
+<section>
+  <div class="container">
+    <div class="badge"><i class="fas fa-tag"></i> Услуги и цены</div>
+    <h2 class="section-title">Сколько стоит вёрстка?</h2>
+    <p class="section-sub">Цены для старта — честно и без завышений. Качество остаётся на высоком уровне.</p>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-file-alt"></i></div>
+        <h3>Лендинг</h3>
+        <div class="price-tag">от 6 900 ₽</div>
+        <div class="price-note">1 страница, до 7 блоков</div>
+        <ul style="margin-top: 16px; list-style: none; font-size: 0.85rem;">
+          <li>✓ Полная адаптивность</li>
+          <li>✓ Анимации при скролле</li>
+          <li>✓ Форма обратной связи</li>
+        </ul>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-building"></i></div>
+        <h3>Сайт-визитка</h3>
+        <div class="price-tag">от 14 900 ₽</div>
+        <div class="price-note">до 5 страниц</div>
+        <ul style="margin-top: 16px; list-style: none; font-size: 0.85rem;">
+          <li>✓ Главная + услуги + контакты</li>
+          <li>✓ Карта, галерея</li>
+          <li>✓ SEO-базовая настройка</li>
+        </ul>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-store"></i></div>
+        <h3>Интернет-магазин</h3>
+        <div class="price-tag">от 25 000 ₽</div>
+        <div class="price-note">каталог + корзина (JS)</div>
+        <ul style="margin-top: 16px; list-style: none; font-size: 0.85rem;">
+          <li>✓ Карточки товаров</li>
+          <li>✓ Фильтрация/сортировка</li>
+          <li>✓ Корзина на чистом JS</li>
+        </ul>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i class="fas fa-paintbrush"></i></div>
+        <h3>Доработки / Правки</h3>
+        <div class="price-tag">от 1 000 ₽/час</div>
+        <div class="price-note">мелкие и средние задачи</div>
+        <ul style="margin-top: 16px; list-style: none; font-size: 0.85rem;">
+          <li>✓ Адаптация под экраны</li>
+          <li>✓ Исправление багов</li>
+          <li>✓ Доведение до идеала</li>
+        </ul>
+      </div>
+    </div>
+    <div class="telegram-badge" style="margin-top: 10px;">
+      <i class="fab fa-telegram"></i> <strong>Акция для первых клиентов:</strong> скидка 20% на первый проект! Укажите промокод «НАЧАЛО» в заявке.
+    </div>
+  </div>
+</section>
+
+<!-- Портфолио (примеры) -->
+<section id="portfolio">
+  <div class="container">
+    <div class="badge"><i class="fas fa-laptop-code"></i> Мои работы</div>
+    <h2 class="section-title">Примеры вёрстки</h2>
+    <p class="section-sub">Каждый проект — Pixel Perfect и быстрая загрузка</p>
+    <div class="portfolio-grid">
+      <div class="portfolio-item"><div class="portfolio-img"><i class="fas fa-crown"></i></div><div class="portfolio-info"><h4>Agency Landing</h4><p>Адаптив, плавные анимации</p></div></div>
+      <div class="portfolio-item"><div class="portfolio-img"><i class="fas fa-utensils"></i></div><div class="portfolio-info"><h4>Ресторан</h4><p>Меню, галерея, бронирование</p></div></div>
+      <div class="portfolio-item"><div class="portfolio-img"><i class="fas fa-graduation-cap"></i></div><div class="portfolio-info"><h4>Образовательный портал</h4><p>Сложные сетки, видео-вставки</p></div></div>
+      <div class="portfolio-item"><div class="portfolio-img"><i class="fas fa-shopping-cart"></i></div><div class="portfolio-info"><h4>Мини-магазин</h4><p>Каталог + корзина на JS</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Форма с Telegram (ВАШ БОТ УЖЕ ВСТАВЛЕН) -->
+<section id="contact">
+  <div class="container">
+    <div class="form-wrapper">
+      <div class="form-flex">
+        <div style="flex: 1.2;">
+          <div class="badge"><i class="fab fa-telegram"></i> Быстрая связь</div>
+          <h3 style="font-size: 1.8rem; margin-bottom: 16px;">Оставьте заявку</h3>
+          <p style="color: #b9c8ff;">Заполните форму — я получу уведомление в Telegram и свяжусь с вами в течение часа. Обсудим проект, сроки и детали.</p>
+          <div style="margin: 28px 0; display: flex; gap: 18px; flex-wrap: wrap;">
+            <span><i class="fab fa-telegram"></i> @codecraft_dev</span>
+            <span><i class="fas fa-envelope"></i> layout@devstudio.ru</span>
+          </div>
+          <div class="telegram-badge">
+            <i class="fas fa-check-circle"></i> Все заявки приходят напрямую владельцу — никаких посредников.
+          </div>
+        </div>
+        <div style="flex: 1;">
+          <form id="tgOrderForm" class="contact-form" style="display: flex; flex-direction: column; gap: 18px;">
+            <input type="text" id="userName" placeholder="Ваше имя *" required>
+            <input type="text" id="userContact" placeholder="Telegram @username или телефон *" required>
+            <input type="text" id="projectType" placeholder="Тип проекта (лендинг / визитка / магазин)">
+            <textarea id="projectDesc" rows="3" placeholder="Краткое описание, ссылка на макет, сроки..."></textarea>
+            <button type="submit" class="btn btn-primary" style="justify-content: center; background: white;"><i class="fab fa-telegram"></i> Отправить заявку в Telegram</button>
+            <div id="formMsg"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 Вёрстка сайтов — честные цены, быстрый отклик. Сайт сделан с любовью к коду.</p>
+    <p style="margin-top: 8px; font-size: 0.8rem;"><i class="fab fa-telegram"></i> Все заявки приходят в Telegram и обрабатываются лично</p>
+  </div>
+</footer>
+
+<script>
+  // ===================== ВАШ ТЕЛЕГРАМ БОТ (УЖЕ ПОДКЛЮЧЁН) =====================
+  const TELEGRAM_BOT_TOKEN = '8616532520:AAE7sms821aeIwziAfo43Nnl3xdCfnGnC9A';
+  const TELEGRAM_CHAT_ID = '8554200161';
+  // ==========================================================================
+
+  async function sendOrderToTelegram(name, contact, project, details) {
+    const currentTime = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
+    let text = `🆕 <b>НОВАЯ ЗАЯВКА НА ВЁРСТКУ!</b>\n\n`;
+    text += `👤 <b>Имя:</b> ${escapeHtml(name)}\n`;
+    text += `📱 <b>Контакт:</b> ${escapeHtml(contact)}\n`;
+    if (project && project.trim() !== '') {
+      text += `📌 <b>Проект:</b> ${escapeHtml(project)}\n`;
+    }
+    if (details && details.trim() !== '') {
+      text += `📝 <b>Описание:</b> ${escapeHtml(details)}\n`;
+    }
+    text += `⏰ <b>Время:</b> ${currentTime}\n`;
+    text += `🌐 <b>Источник:</b> Landing Page (верстка)`;
+    
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: text,
+          parse_mode: 'HTML',
+          disable_web_page_preview: true
+        })
+      });
+      const result = await response.json();
+      if (result.ok) return { success: true };
+      else return { success: false, error: result.description };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  
+  const form = document.getElementById('tgOrderForm');
+  const feedback = document.getElementById('formMsg');
+  
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const name = document.getElementById('userName').value.trim();
+    const contact = document.getElementById('userContact').value.trim();
+    const project = document.getElementById('projectType').value.trim();
+    const details = document.getElementById('projectDesc').value.trim();
+    
+    if (!name || !contact) {
+      feedback.innerHTML = '<div style="background:#ff918d33; padding:10px; border-radius:40px; color:#ffb4b0;"><i class="fas fa-exclamation-circle"></i> Укажите имя и контакт (Telegram или телефон)</div>';
+      return;
+    }
+    
+    feedback.innerHTML = '<div style="background:#2c3f5e; padding:10px; border-radius:40px;"><i class="fas fa-spinner fa-pulse"></i> Отправка заявки в Telegram...</div>';
+    
+    const result = await sendOrderToTelegram(name, contact, project, details);
+    
+    if (result.success) {
+      feedback.innerHTML = '<div style="background:#1d4630; padding:10px; border-radius:40px;"><i class="fas fa-check-circle"></i> ✅ Заявка отправлена! Я свяжусь с вами в Telegram в ближайшее время.</div>';
+      form.reset();
+      setTimeout(() => { feedback.innerHTML = ''; }, 6000);
+    } else {
+      let errMsg = '❌ Ошибка отправки. Попробуйте позже или напишите напрямую в Telegram: @codecraft_dev';
+      if (result.error && result.error.includes('401')) errMsg = '❌ Ошибка бота: проверьте токен';
+      if (result.error && result.error.includes('400')) errMsg = '❌ Ошибка: неверный chat_id';
+      feedback.innerHTML = `<div style="background:#8b3a3a80; padding:10px; border-radius:40px;">${errMsg}</div>`;
+    }
+  });
+  
+  // плавный скролл
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const targetId = this.getAttribute('href');
+      if (targetId === "#" || targetId === "") return;
+      const target = document.querySelector(targetId);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
 </body>
-</html>
+</html>>
