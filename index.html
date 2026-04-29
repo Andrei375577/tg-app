@@ -1,102 +1,532 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Стихи</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #20223d;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    .card {
-      background: linear-gradient(145deg, #2a2a3d, #1a1a2b);
-      border-radius: 20px;
-      padding: 24px;
-      max-width: 320px;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
-      color: #f0f0f0;
-      text-align: center;
-      position: relative;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      width: 50px;
-      height: 50px;
-      background: radial-gradient(circle, #ff0026, transparent);
-      border-radius: 50%;
-      opacity: 0.4;
-    }
-    .poem {
-      font-size: 13px;
-      line-height: 9px;
-      white-space: pre-wrap;
-      margin: 0 0 12px 0;
-    }
-    .author {
-      font-size: 13px;
-      color: #aaa;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sensei AI — ваш умный помощник</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: #0a0a0f;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Шапка — Sensei AI */
+        .chat-header {
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .sensei-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .header-text h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-text p {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            background: rgba(255, 215, 0, 0.15);
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* Область сообщений */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: #0a0a0f;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeSlideUp 0.25s ease;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+
+        .bot-avatar {
+            background: #1e1e2f;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        .bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+        }
+
+        .user-bubble {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #0a0a0f;
+            border-bottom-right-radius: 4px;
+            font-weight: 500;
+        }
+
+        .bot-bubble {
+            background: #1a1a2a;
+            color: #e0e0e0;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        /* Индикатор "Сенсей думает" */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: #1a1a2a;
+            border-radius: 24px;
+            width: fit-content;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: senseiTyping 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes senseiTyping {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* Панель ввода */
+        .input-area {
+            padding: 18px 20px;
+            background: #0f0f17;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            background: #1a1a2a;
+            border-radius: 28px;
+            padding: 8px 18px;
+            transition: all 0.2s;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #ffd700;
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 0;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            max-height: 100px;
+            color: #fff;
+        }
+
+        .message-input::placeholder {
+            color: #666;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border: none;
+            color: #0a0a0f;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.15s, box-shadow 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+        }
+
+        .send-btn:active {
+            transform: scale(0.96);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .clear-btn {
+            background: #2a2a3a;
+            color: #ffaa44;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: #1a1a2a;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            color: #ffd700;
+        }
+
+        .icon-btn:hover {
+            background: #2a2a3a;
+            border-color: #ffd700;
+        }
+
+        /* Скролл */
+        .messages-area::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .messages-area::-webkit-scrollbar-track {
+            background: #1a1a2a;
+        }
+
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #ffd700;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .message {
+                max-width: 95%;
+            }
+            .chat-container {
+                height: 95vh;
+                border-radius: 24px;
+            }
+            .header-text h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="card">
-  <div class="poem">
-    Осень шепчет — прощай, не держи,<br>
-    Я ушёл, как туман за оврагом.<br>
-    Ты в глазах моих — свет от зари,<br>
-    Но я стал для тебя только шагом.
-  </div>
-  <div class="author">— Сердце без имени</div>
-</div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="sensei-icon">⚡</div>
+            <div class="header-text">
+                <h1>Sensei AI</h1>
+                <p>ваш персональный наставник</p>
+            </div>
+            <div class="status-badge">● всегда рядом</div>
+        </div>
 
-<div class="card">
-  <div class="poem">
-    Я любил тебя — тихо, как снег,<br>
-    Что ложится на крышу без звука.<br>
-    Но ушёл, как уходит человек,<br>
-    Что не вынес ни ласки, ни муки.
-  </div>
-  <div class="author">— Сердце без имени</div>
-</div>
+        <div class="messages-area" id="messagesArea">
+            <div class="message bot-message">
+                <div class="avatar bot-avatar">🧘</div>
+                <div class="bubble bot-bubble">
+                    Приветствую, ученик. Я <strong>Sensei AI</strong>.<br>
+                    Задавай вопросы — я помогу разобраться в любых темах. Чему хочешь научиться сегодня?
+                </div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="avatar bot-avatar" style="background:transparent;">🧘</div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <span style="color:#ffd700; font-size:0.75rem; margin-left:6px;">сенсей думает...</span>
+            </div>
+        </div>
 
-<div class="card">
-  <div class="poem">
-    В поле — ветер, в душе — пустота,<br>
-    Я брожу между строк, как по краю.<br>
-    Ты — как песня, что пела мечта,<br>
-    А теперь — я её забываю.
-  </div>
-  <div class="author">— Сердце без имени</div>
-</div>
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea class="message-input" id="messageInput" placeholder="Напиши свой вопрос..." rows="1"></textarea>
+            </div>
+            <div class="action-buttons">
+                <button class="icon-btn clear-btn" id="clearBtn" title="Очистить диалог">🗑️</button>
+                <button class="send-btn" id="sendBtn">➤</button>
+            </div>
+        </div>
+    </div>
 
-<div class="card">
-  <div class="poem">
-    Я писал тебе письма в тетрадь,<br>
-    Где чернила — слезинки и вьюга.<br>
-    Но ты — как весна, что опять<br>
-    Не пришла, хоть я ждал её с юга.
-  </div>
-  <div class="author">— Сердце без имени</div>
-</div>
-
-<div class="card">
-  <div class="poem">
-    Не суди меня строго, родная,<br>
-    Я — как лист, что упал на дорогу.<br>
-    Я любил, но ушёл, не прощая,<br>
-    Потому что не знал — как немного.
-  </div>
-  <div class="author">— Сердце без имени</div>
-</div>
+    <script>
+        // ⚡ API настройки (DeepSeek, но в интерфейсе просто Sensei AI)
+        const DEEPSEEK_API_KEY = "sk-2d9f1fe5e23b493484f2fa7fc5cc139a";
+        const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
+        
+        // DOM элементы
+        const messagesArea = document.getElementById('messagesArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // История диалога (контекст)
+        let conversationHistory = [
+            {
+                role: "system",
+                content: "Ты — Sensei AI, мудрый и дружелюбный наставник. Отвечай ясно, вдохновляюще, на русском языке. Помогай пользователю думать шире и находить ответы. Не упоминай конкретные модели AI, просто будь Sensei."
+            }
+        ];
+        
+        // Авто-высота textarea
+        function autoResize() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+        }
+        
+        messageInput.addEventListener('input', autoResize);
+        
+        function scrollToBottom() {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+        
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${isUser ? 'user-avatar' : 'bot-avatar'}`;
+            avatar.textContent = isUser ? '👤' : '🧘';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${isUser ? 'user-bubble' : 'bot-bubble'}`;
+            bubble.textContent = text;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            
+            messagesArea.insertBefore(messageDiv, typingIndicator);
+            scrollToBottom();
+        }
+        
+        function showTyping(show) {
+            typingIndicator.style.display = show ? 'flex' : 'none';
+            scrollToBottom();
+        }
+        
+        // Запрос к API (без указания модели в интерфейсе)
+        async function askSensei(userMessage) {
+            conversationHistory.push({ role: "user", content: userMessage });
+            
+            if (conversationHistory.length > 25) {
+                conversationHistory = [conversationHistory[0], ...conversationHistory.slice(-22)];
+            }
+            
+            try {
+                const response = await fetch(DEEPSEEK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: conversationHistory,
+                        stream: false,
+                        temperature: 0.75,
+                        max_tokens: 2000
+                    })
+                });
+                
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error?.message || `Ошибка ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                
+                conversationHistory.push({ role: "assistant", content: reply });
+                return reply;
+                
+            } catch (error) {
+                console.error(error);
+                let friendlyError = "❌ Сенсей временно недоступен. ";
+                if (error.message.includes('401')) friendlyError += "Проверь ключ доступа.";
+                else if (error.message.includes('429')) friendlyError += "Слишком много вопросов. Дыши глубже и попробуй позже.";
+                else friendlyError += "Попробуй ещё раз через минуту.";
+                return friendlyError + " 🧘";
+            }
+        }
+        
+        // Отправка сообщения
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            messageInput.value = '';
+            autoResize();
+            
+            addMessage(text, true);
+            showTyping(true);
+            sendBtn.disabled = true;
+            
+            const botReply = await askSensei(text);
+            
+            showTyping(false);
+            addMessage(botReply, false);
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
+        
+        // Очистка (новая медитация)
+        function clearChat() {
+            conversationHistory = [
+                {
+                    role: "system",
+                    content: "Ты — Sensei AI, мудрый и дружелюбный наставник. Отвечай ясно, вдохновляюще, на русском языке. Помогай пользователю думать шире и находить ответы. Не упоминай конкретные модели AI, просто будь Sensei."
+                }
+            ];
+            
+            const allMsgs = document.querySelectorAll('.message');
+            allMsgs.forEach(msg => msg.remove());
+            
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'message bot-message';
+            welcomeDiv.innerHTML = `
+                <div class="avatar bot-avatar">🧘</div>
+                <div class="bubble bot-bubble">
+                    Диалог очищен. Начнём заново? Я слушаю тебя, ученик.
+                </div>
+            `;
+            messagesArea.insertBefore(welcomeDiv, typingIndicator);
+            scrollToBottom();
+        }
+        
+        sendBtn.addEventListener('click', sendMessage);
+        clearBtn.addEventListener('click', clearChat);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // маленькая заметка про ключ (убрать рекламу модели)
+        console.log("Sensei AI готов — мудрость не знает границ");
+        
+        // Проверка ключа (без упоминания deepseek в ui)
+        if (!DEEPSEEK_API_KEY || DEEPSEEK_API_KEY === "sk-46c82ae8da164c4b99e66d86a12c81ab") {
+            setTimeout(() => {
+                addMessage("⚡ Совет: если ответов нет — проверь подключение к API. Я — Sensei, но тоже завишу от цифрового мира.", false);
+            }, 800);
+        }
+    </script>
 </body>
 </html>
